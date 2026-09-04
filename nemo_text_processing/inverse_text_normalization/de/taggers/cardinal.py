@@ -20,12 +20,9 @@ from nemo_text_processing.inverse_text_normalization.de.graph_utils import NEMO_
 from nemo_text_processing.inverse_text_normalization.de.utils import get_abs_path
 
 
-
 def _digit_tie_flips():
     """Map concatenated ones+tens (12 for einundzwanzig) to the written number (21)."""
-    return pynini.string_map(
-        [(f"{ones}{tens}", f"{tens}{ones}") for tens in range(2, 10) for ones in range(1, 10)]
-    )
+    return pynini.string_map([(f"{ones}{tens}", f"{tens}{ones}") for tens in range(2, 10) for ones in range(1, 10)])
 
 
 class CardinalFst(GraphFst):
