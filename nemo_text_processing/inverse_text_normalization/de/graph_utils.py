@@ -35,9 +35,9 @@ NEMO_UPPER = pynini.union(*string.ascii_uppercase).optimize()
 NEMO_ALPHA = pynini.union(NEMO_LOWER, NEMO_UPPER).optimize()
 NEMO_ALNUM = pynini.union(NEMO_DIGIT, NEMO_ALPHA).optimize()
 NEMO_HEX = pynini.union(*string.hexdigits).optimize()
-NEMO_NON_BREAKING_SPACE = "\u00A0"
+NEMO_NON_BREAKING_SPACE = "\u00a0"
 NEMO_SPACE = " "
-NEMO_WHITE_SPACE = pynini.union(" ", "\t", "\n", "\r", "\u00A0").optimize()
+NEMO_WHITE_SPACE = pynini.union(" ", "\t", "\n", "\r", "\u00a0").optimize()
 NEMO_NOT_SPACE = pynini.difference(NEMO_CHAR, NEMO_WHITE_SPACE).optimize()
 NEMO_NOT_QUOTE = pynini.difference(NEMO_CHAR, r'"').optimize()
 
@@ -113,20 +113,13 @@ _s = NEMO_SIGMA + pynutil.insert("s")
 
 graph_plural = plurals._priority_union(
     suppletive,
-    plurals._priority_union(
-        _ies, plurals._priority_union(_es, _s, NEMO_SIGMA), NEMO_SIGMA
-    ),
+    plurals._priority_union(_ies, plurals._priority_union(_es, _s, NEMO_SIGMA), NEMO_SIGMA),
     NEMO_SIGMA,
 ).optimize()
 
 SINGULAR_TO_PLURAL = graph_plural
 PLURAL_TO_SINGULAR = pynini.invert(graph_plural)
-TO_LOWER = pynini.union(
-    *[
-        pynini.cross(x, y)
-        for x, y in zip(string.ascii_uppercase, string.ascii_lowercase)
-    ]
-)
+TO_LOWER = pynini.union(*[pynini.cross(x, y) for x, y in zip(string.ascii_uppercase, string.ascii_lowercase)])
 TO_UPPER = pynini.invert(TO_LOWER)
 MIN_NEG_WEIGHT = -0.0001
 MIN_POS_WEIGHT = 0.0001
@@ -154,9 +147,7 @@ def capitalized_input_graph(
         graph = pynutil.add_weight(graph, weight=original_graph_weight)
 
     if capitalized_graph_weight is not None:
-        capitalized_graph = pynutil.add_weight(
-            capitalized_graph, weight=capitalized_graph_weight
-        )
+        capitalized_graph = pynutil.add_weight(capitalized_graph, weight=capitalized_graph_weight)
 
     graph |= capitalized_graph
     return graph
@@ -212,9 +203,7 @@ def convert_space(fst) -> "pynini.FstLike":
 
     Returns output fst where breaking spaces are converted to non breaking spaces
     """
-    return fst @ pynini.cdrewrite(
-        pynini.cross(NEMO_SPACE, NEMO_NON_BREAKING_SPACE), "", "", NEMO_SIGMA
-    )
+    return fst @ pynini.cdrewrite(pynini.cross(NEMO_SPACE, NEMO_NON_BREAKING_SPACE), "", "", NEMO_SIGMA)
 
 
 def string_map_cased(input_file: str, input_case: str = INPUT_LOWER_CASED):
@@ -278,13 +267,9 @@ class GraphFst:
         self._fst = None
         self.deterministic = deterministic
 
-        self.far_path = Path(
-            os.path.dirname(__file__) + "/grammars/" + kind + "/" + name + ".far"
-        )
+        self.far_path = Path(os.path.dirname(__file__) + "/grammars/" + kind + "/" + name + ".far")
         if self.far_exist():
-            self._fst = Far(
-                self.far_path, mode="r", arc_type="standard", far_type="default"
-            ).get_fst()
+            self._fst = Far(self.far_path, mode="r", arc_type="standard", far_type="default").get_fst()
 
     def far_exist(self) -> bool:
         """
@@ -331,4 +316,4 @@ class GraphFst:
             + delete_space
             + pynutil.delete("}")
         )
-        return res @ pynini.cdrewrite(pynini.cross("\u00A0", " "), "", "", NEMO_SIGMA)
+        return res @ pynini.cdrewrite(pynini.cross("\u00a0", " "), "", "", NEMO_SIGMA)

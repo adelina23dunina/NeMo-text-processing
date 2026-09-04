@@ -15,13 +15,9 @@
 
 import pynini
 from pynini.lib import pynutil
+
+from nemo_text_processing.inverse_text_normalization.de.graph_utils import NEMO_DIGIT, NEMO_SIGMA, NEMO_SPACE, GraphFst
 from nemo_text_processing.inverse_text_normalization.de.utils import get_abs_path
-from nemo_text_processing.inverse_text_normalization.de.graph_utils import (
-    NEMO_DIGIT,
-    NEMO_SIGMA,
-    NEMO_SPACE,
-    GraphFst,
-)
 
 
 class CardinalFst(GraphFst):
@@ -39,9 +35,7 @@ class CardinalFst(GraphFst):
         digits = pynini.string_file(get_abs_path("data/cardinal/digits.tsv"))
         # Isolates single digit cardinals to pass to other graphs
         self.digits = digits.optimize()
-        to_denormalize = pynini.string_file(
-            get_abs_path("data/cardinal/denormalized.tsv")
-        )
+        to_denormalize = pynini.string_file(get_abs_path("data/cardinal/denormalized.tsv"))
         # Isolates the first dozen
         self.dozen = to_denormalize.optimize()
         teens = pynini.string_file(get_abs_path("data/cardinal/teens.tsv"))
@@ -84,11 +78,7 @@ class CardinalFst(GraphFst):
                 + delete_space.ques
                 + digits
             )
-            | (
-                (digits | pynutil.insert("1"))
-                + delete_space.ques
-                + pynini.cross("hundert", "00")
-            )
+            | ((digits | pynutil.insert("1")) + delete_space.ques + pynini.cross("hundert", "00"))
         )
 
         # Digits are grouped in clusters of three: {hundreds}{tens}{ones}.
@@ -101,22 +91,13 @@ class CardinalFst(GraphFst):
         )
         # The subgraph below introduces three-digit clusters containing at least one non-zero digit.
         # It is mainly utilized by the "years" subgraph in the DATE class.
-        non_zero_digit_cluster = (
-            (hundreds)
-            | (pynutil.insert("0") + graph_10_99)
-            | (pynutil.insert("00") + digits)
-        )
+        non_zero_digit_cluster = (hundreds) | (pynutil.insert("0") + graph_10_99) | (pynutil.insert("00") + digits)
 
         # WFST grammar for thousands
         thousands = (pynini.cross("tausend", "1.000")) | (
             (
                 (pynini.cross("tausend", "1.") + delete_space.ques + delete_und.ques)
-                | (
-                    digit_cluster
-                    + delete_space.ques
-                    + pynini.cross("tausend", ".")
-                    + delete_und.ques
-                )
+                | (digit_cluster + delete_space.ques + pynini.cross("tausend", ".") + delete_und.ques)
                 | pynutil.insert("000.")
             )
             + delete_space.ques
@@ -126,12 +107,7 @@ class CardinalFst(GraphFst):
         non_zero_thousands = (pynini.cross("tausend", "1.000")) | (
             (
                 (pynini.cross("tausend", "1.") + delete_space.ques + delete_und.ques)
-                | (
-                    non_zero_digit_cluster
-                    + delete_space.ques
-                    + pynini.cross("tausend", ".")
-                    + delete_und.ques
-                )
+                | (non_zero_digit_cluster + delete_space.ques + pynini.cross("tausend", ".") + delete_und.ques)
                 # | pynutil.insert("000.")
             )
             + delete_space.ques
@@ -143,12 +119,7 @@ class CardinalFst(GraphFst):
         millions = (pynini.cross("million", "1.000.000")) | (
             (
                 (pynini.cross("million", "1.") + delete_space.ques + delete_und.ques)
-                | (
-                    digit_cluster
-                    + delete_space.ques
-                    + pynini.cross(million, ".")
-                    + delete_und.ques
-                )
+                | (digit_cluster + delete_space.ques + pynini.cross(million, ".") + delete_und.ques)
                 | pynutil.insert("000.")
             )
             + delete_space.ques
@@ -166,18 +137,11 @@ class CardinalFst(GraphFst):
         billions = (pynini.cross("milliarde", "1.000.000.000")) | (
             (
                 (
-                    pynini.cross(
-                        (pynini.accep("milliarde") | pynini.accep("milliard")), "1."
-                    )
+                    pynini.cross((pynini.accep("milliarde") | pynini.accep("milliard")), "1.")
                     + delete_space.ques
                     + delete_und.ques
                 )
-                | (
-                    digit_cluster
-                    + delete_space.ques
-                    + pynini.cross(billion, ".")
-                    + delete_und.ques
-                )
+                | (digit_cluster + delete_space.ques + pynini.cross(billion, ".") + delete_und.ques)
                 | pynutil.insert("000.")
             )
             + delete_space.ques
@@ -189,12 +153,7 @@ class CardinalFst(GraphFst):
         trillions = (pynini.cross("billion", "1.000.000.000.000")) | (
             (
                 (pynini.cross("billion", "1.") + delete_space.ques + delete_und.ques)
-                | (
-                    digit_cluster
-                    + delete_space.ques
-                    + pynini.cross(trillion, ".")
-                    + delete_und.ques
-                )
+                | (digit_cluster + delete_space.ques + pynini.cross(trillion, ".") + delete_und.ques)
                 | pynutil.insert("000.")
             )
             + delete_space.ques
@@ -212,12 +171,7 @@ class CardinalFst(GraphFst):
         quadrillions = (pynini.cross("billiarde", "1.000.000.000.000.000")) | (
             (
                 (pynini.cross(quadrillion, "1.") + delete_space.ques + delete_und.ques)
-                | (
-                    digit_cluster
-                    + delete_space.ques
-                    + pynini.cross(quadrillion, ".")
-                    + delete_und.ques
-                )
+                | (digit_cluster + delete_space.ques + pynini.cross(quadrillion, ".") + delete_und.ques)
                 | pynutil.insert("000.")
             )
             + delete_space.ques
@@ -229,12 +183,7 @@ class CardinalFst(GraphFst):
         quintillions = (pynini.cross("trillion", "1.000.000.000.000.000.000")) | (
             (
                 (pynini.cross("trillion", "1.") + delete_space.ques + delete_und.ques)
-                | (
-                    digit_cluster
-                    + delete_space.ques
-                    + pynini.cross(quintillion, ".")
-                    + delete_und.ques
-                )
+                | (digit_cluster + delete_space.ques + pynini.cross(quintillion, ".") + delete_und.ques)
                 | pynutil.insert("000.")
             )
             + delete_space.ques
@@ -252,12 +201,7 @@ class CardinalFst(GraphFst):
         sextillions = (pynini.cross("billiarde", "1.000.000.000.000.000.000.000")) | (
             (
                 (pynini.cross(sextillion, "1.") + delete_space.ques + delete_und.ques)
-                | (
-                    digit_cluster
-                    + delete_space.ques
-                    + pynini.cross(sextillion, ".")
-                    + delete_und.ques
-                )
+                | (digit_cluster + delete_space.ques + pynini.cross(sextillion, ".") + delete_und.ques)
                 | pynutil.insert("000.")
             )
             + delete_space.ques
@@ -268,9 +212,7 @@ class CardinalFst(GraphFst):
         non_zero_digits = pynini.difference(NEMO_DIGIT, "0")
         chars_to_remove = pynini.accep("0") | pynini.accep(".")
         remove_chars = pynutil.delete(pynini.closure(chars_to_remove))
-        remove_leading_zeros = pynini.cdrewrite(
-            remove_chars, "[BOS]", non_zero_digits, NEMO_SIGMA
-        )
+        remove_leading_zeros = pynini.cdrewrite(remove_chars, "[BOS]", non_zero_digits, NEMO_SIGMA)
 
         # All together now
         grammars = [
@@ -301,9 +243,7 @@ class CardinalFst(GraphFst):
         # The graph below covers exceptions
         # e.g. years 1100 - 1999
         # and all colloquial expresions (e.g. zwanzigvierundzwanzig -> 2024)
-        single_digit_years = pynini.string_file(
-            get_abs_path("data/cardinal/single_digit_years.tsv")
-        )
+        single_digit_years = pynini.string_file(get_abs_path("data/cardinal/single_digit_years.tsv"))
         ten = "zehn"
         remove_ten = pynini.project(graph_10_99, "input") - ten
         graph_11_99 = remove_ten @ graph_10_99
@@ -316,16 +256,12 @@ class CardinalFst(GraphFst):
             + (single_digit_years | graph_10_99 | pynutil.insert("00"))
         )
         years = first_millenium | second_tenth_millenium | years_exceptions
-        remove_period_separators = pynini.cdrewrite(
-            pynutil.delete("."), "", "", NEMO_SIGMA
-        )
+        remove_period_separators = pynini.cdrewrite(pynutil.delete("."), "", "", NEMO_SIGMA)
         years = years @ remove_leading_zeros @ remove_period_separators
         self.graph_years = years.optimize()
 
         # The block below leaves numerals 1 - 12 canonically normalized
-        accept_denormalized_first_dozen = pynini.project(
-            to_denormalize, "input"
-        )  # acceptor for null - zwölf
+        accept_denormalized_first_dozen = pynini.project(to_denormalize, "input")  # acceptor for null - zwölf
         accept_denormalized_everything = pynini.project(
             self.graph_all_cardinals, "input"
         )  # acceptor for all verbalized cardinals
@@ -339,28 +275,18 @@ class CardinalFst(GraphFst):
         self.graph = graph.optimize()
 
         self.optional_negative = pynini.closure(
-            pynutil.insert("negative: ")
-            + pynini.cross("minus ", '"-"')
-            + pynutil.insert(" "),
+            pynutil.insert("negative: ") + pynini.cross("minus ", '"-"') + pynutil.insert(" "),
             0,
             1,
         )
 
         all_cardinals_graph = (
-            self.optional_negative
-            + pynutil.insert('integer: "')
-            + self.graph_all_cardinals
-            + pynutil.insert('"')
+            self.optional_negative + pynutil.insert('integer: "') + self.graph_all_cardinals + pynutil.insert('"')
         )
         self.all_cardinals_graph = all_cardinals_graph.optimize()
 
         # The final graph for this semiotic class leaves the first dozen normalized
-        final_graph = (
-            self.optional_negative
-            + pynutil.insert('integer: "')
-            + self.graph
-            + pynutil.insert('"')
-        )
+        final_graph = self.optional_negative + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
 
         # The block below handles noun + number combinations, where the noun forces full denormalization
         # The nouns are implemented as a .tsv list
@@ -389,4 +315,4 @@ class CardinalFst(GraphFst):
         self.optional_minus_graph = self.optional_negative
         self.graph_hundred_component_at_least_one_none_zero_digit = self.graph_all_cardinals
         self.digit = self.digits
-        self.graph_ties = self.graph_double_digits 
+        self.graph_ties = self.graph_double_digits
