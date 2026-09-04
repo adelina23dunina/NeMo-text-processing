@@ -295,27 +295,10 @@ class CardinalFst(GraphFst):
         # The final graph for this semiotic class leaves the first dozen normalized
         final_graph = self.optional_negative + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
 
-        # The block below handles noun + number combinations, where the noun forces full denormalization
-        # The nouns are implemented as a .tsv list
-        nouns_forcing_denormalization = pynini.string_file(
-            get_abs_path("data/measure/nouns_forcing_denormalization.tsv")
-        )
-        graph_forced_denormalization = (
-            pynutil.insert("morphosyntactic_features: ")
-            + pynutil.insert('"')
-            + nouns_forcing_denormalization
-            + pynutil.insert('"')
-            + pynini.accep(NEMO_SPACE)
-            + all_cardinals_graph
-        )
-
         # Canonical representation with the first dozen normalized
         self.canonical_cardinals_graph = final_graph.optimize()
 
-        # Updated final graph to account for DPs with a denormalization-inducing noun in the D' position
-        updated_final_graph = (final_graph | graph_forced_denormalization).optimize()
-
-        final_graph = self.add_tokens(updated_final_graph)
+        final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()
 
         self.graph_no_exception = self.graph_all_cardinals
