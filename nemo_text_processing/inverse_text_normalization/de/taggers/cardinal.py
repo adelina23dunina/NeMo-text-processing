@@ -47,7 +47,8 @@ class CardinalFst(GraphFst):
         self.dozen = to_denormalize.optimize()
         teens = pynini.string_file(get_abs_path("data/cardinal/teens.tsv"))
         tens = pynini.string_file(get_abs_path("data/cardinal/tens.tsv"))
-        ties = pynini.string_file(get_abs_path("data/cardinal/ties.tsv"))
+        # Standalone decades: tens digit (2) + 0 -> 20
+        ties = tens + pynutil.insert("0")
         # German flips ones and tens in two-digit numbers (ein + zwanzig -> 21).
         flips = _digit_tie_flips()
         delete_space = pynutil.delete(NEMO_SPACE)
