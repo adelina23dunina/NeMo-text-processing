@@ -25,7 +25,6 @@ def _digit_tie_flips():
     return pynini.string_map([(f"{ones}{tens}", f"{tens}{ones}") for tens in range(2, 10) for ones in range(1, 10)])
 
 
-
 def _forms(lexicon, lemma):
     """Spoken forms for one lemma (e.g. million / millionen)."""
     return pynini.project(lexicon @ pynini.accep(lemma), "input").optimize()
@@ -163,11 +162,7 @@ class CardinalFst(GraphFst):
         billion = milliarde
         billions = (pynini.cross(milliarde, "1.000.000.000")) | (
             (
-                (
-                    pynini.cross(milliarde, "1.")
-                    + delete_space.ques
-                    + delete_und.ques
-                )
+                (pynini.cross(milliarde, "1.") + delete_space.ques + delete_und.ques)
                 | (digit_cluster + delete_space.ques + pynini.cross(billion, ".") + delete_und.ques)
                 | pynutil.insert("000.")
             )
