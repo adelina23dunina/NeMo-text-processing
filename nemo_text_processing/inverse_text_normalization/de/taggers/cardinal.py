@@ -250,7 +250,6 @@ class CardinalFst(GraphFst):
         # The graph below covers exceptions
         # e.g. years 1100 - 1999
         # and all colloquial expresions (e.g. zwanzigvierundzwanzig -> 2024)
-        single_digit_years = pynini.string_file(get_abs_path("data/cardinal/single_digit_years.tsv"))
         ten = "zehn"
         remove_ten = pynini.project(graph_10_99, "input") - ten
         graph_11_99 = remove_ten @ graph_10_99
@@ -260,7 +259,7 @@ class CardinalFst(GraphFst):
             + pynutil.delete(NEMO_SPACE).ques
             + pynutil.delete("hundert").ques
             + pynutil.delete(NEMO_SPACE).ques
-            + (single_digit_years | graph_10_99 | pynutil.insert("00"))
+            + (graph_10_99 | pynutil.insert("00"))
         )
         years = first_millenium | second_tenth_millenium | years_exceptions
         remove_period_separators = pynini.cdrewrite(pynutil.delete("."), "", "", NEMO_SIGMA)
