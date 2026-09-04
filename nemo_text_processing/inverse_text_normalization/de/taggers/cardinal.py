@@ -31,11 +31,13 @@ class CardinalFst(GraphFst):
         super().__init__(name="cardinal", kind="classify")
 
         # WFST mappings for numbers 0-99
-        zero = pynini.string_map([("null", "0")])
+        zero = pynini.string_file(get_abs_path("data/cardinal/zero.tsv"))
         digits = pynini.string_file(get_abs_path("data/cardinal/digits.tsv"))
         # Isolates single digit cardinals to pass to other graphs
         self.digits = digits.optimize()
-        to_denormalize = pynini.string_file(get_abs_path("data/cardinal/denormalized.tsv"))
+        irregular_teens = pynini.string_file(get_abs_path("data/cardinal/irregular_teens.tsv"))
+        # 0-12 stay as words: zero + digits (1-9) + irregular teens (10-12)
+        to_denormalize = zero | digits | irregular_teens
         # Isolates the first dozen
         self.dozen = to_denormalize.optimize()
         teens = pynini.string_file(get_abs_path("data/cardinal/teens.tsv"))
